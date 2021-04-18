@@ -13,6 +13,7 @@ class Game(models.Model):
     platforms = models.CharField(max_length=250)
     pegi = models.CharField(max_length=250)
     tags = models.CharField(max_length=250)
+    description = models.CharField(max_length=500, default='No description')
     image_url = models.CharField(max_length=250, default='No image')
     page_url = models.CharField(max_length=250, default='No page url')
 

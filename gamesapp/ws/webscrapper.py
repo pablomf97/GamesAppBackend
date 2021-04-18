@@ -48,6 +48,8 @@ def get_game_from_url(game_url):
     game_developer = game_info[2].text.strip()
     game_publisher = game_info[3].text.strip()
     game_pegi = game_info[5].text.strip()
+    game_description = soup.find('div', id='about')\
+        .find('p').text.strip()
 
     # Need to perform some operations in some fields
     game_platforms = game_info[4].text.split('\n')
@@ -72,6 +74,7 @@ def get_game_from_url(game_url):
         platforms=game_platforms,
         pegi=game_pegi,
         tags=game_tags,
+        description=game_description,
         image_url=game_image,
         page_url=game_url
     )
