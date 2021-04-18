@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
@@ -31,13 +32,34 @@ class TopGamesView(APIView):
 class GameView(APIView):
     # GET request - Retrieves the requested game
     def get(self, request):
-        data = request.data
-        try:
-            game_url = data['href']
+        game_data = request.data
 
-            return Response({"Test": "test"})
+        if game_data.get('game_href'):
+            game_url = game_data.get('game_href')
+            if not game_url.startswith(webscrapper.REQUEST_URL_BASE):
+                return Response({"error": "Oops! The game you requested doesn't exist..."},
+                                status=status.HTTP_400_BAD_REQUEST,
+                                content_type="application/json")
 
-        except KeyError:
-            game_name = data['game_name']
+            # Check if the game exist in the database
+            try:
+                game_db = Game.objects.get(page_url=game_url)
+                return Response(GameSerializer(game_db).data)
+            except ObjectDoesNotExist:
+                game = webscrapper.get_game_from_url(game_url)
+                game.save()
+                return Response(GameSerializer(game).data)
 
-            return Response({"Test2": "test2"})
+        elif game_data.get('game_name'):
+            try:
+                game_name = game_data.get('game_name')
+                game_db = Game.objects.get(name=game_name)
+                return Response(GameSerializer(game_db).data)
+            except ObjectDoesNotExist:
+                return Response({"error": "Oops! The game you requested doesn't exist..."},
+                                status=status.HTTP_404_NOT_FOUND,
+                                content_type="application/json")
+        else:
+            return Response({"error": "Oops! The game you requested doesn't exist..."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                            content_type="application/json")

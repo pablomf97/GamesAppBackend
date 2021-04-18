@@ -6,8 +6,9 @@ from .models import Game, ListGame
 class GameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Game
-        fields = ['id', 'name', 'release_date', 'official_website',
-                  'developer', 'publisher', 'platforms', 'pegi', 'tags']
+        fields = ['name', 'release_date', 'official_website',
+                  'developer', 'publisher', 'platforms', 'pegi',
+                  'tags', 'image_url', 'page_url']
 
 
 class ListGameSerializer(serializers.HyperlinkedModelSerializer):
