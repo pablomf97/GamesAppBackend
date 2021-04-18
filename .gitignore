@@ -154,3 +154,5 @@ Thumbs.db
 # profiling data
 .prof
 
+# migrations
+/gamesapp/migrations
