@@ -1,6 +1,7 @@
 import uuid
 
 from django.db import models
+from django.contrib.auth.models import User as RESTUser
 
 
 class Game(models.Model):
@@ -25,3 +26,8 @@ class ListGame(models.Model):
     merchant = models.CharField(max_length=250)
     price = models.CharField(max_length=250)
     href = models.CharField(max_length=250)
+
+
+class User(models.Model):
+    user = models.OneToOneField(RESTUser, on_delete=models.CASCADE)
+    games = models.ManyToManyField(Game)

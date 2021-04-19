@@ -1,19 +1,18 @@
 from django.core.exceptions import ObjectDoesNotExist
-from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from .ws import webscrapper
+from ..ws import webscrapper
 
-from .models import Game
-from .serializers import GameSerializer, ListGameSerializer
+from ..models import Game
+from ..serializers import GameSerializer, ListGameSerializer
 
 
 # Create your views here.
 class GameListView(APIView):
+
     # GET request - Retrieves every game on the db
     def get(self, request):
         games = Game.objects.all()
@@ -22,6 +21,7 @@ class GameListView(APIView):
 
 
 class TopGamesView(APIView):
+
     # GET request - Retrieves the top 25 games
     def get(self, request):
         top_25_games = webscrapper.get_top_25()
@@ -30,6 +30,7 @@ class TopGamesView(APIView):
 
 
 class GameView(APIView):
+
     # GET request - Retrieves the requested game
     def get(self, request):
         game_data = request.data
@@ -66,6 +67,7 @@ class GameView(APIView):
 
 
 class SearchView(APIView):
+
     # GET Request - Gets the list of games given a game name
     def get(self, request, game_name, page_number=None):
 
