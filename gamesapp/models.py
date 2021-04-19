@@ -21,6 +21,7 @@ class Game(models.Model):
 class ListGame(models.Model):
     id = models.BigAutoField(primary_key=True)
     name = models.CharField(max_length=250)
+    info = models.CharField(max_length=250, default='No info')
     merchant = models.CharField(max_length=250)
     price = models.CharField(max_length=250)
     href = models.CharField(max_length=250)

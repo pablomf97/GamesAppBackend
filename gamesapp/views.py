@@ -63,3 +63,22 @@ class GameView(APIView):
             return Response({"error": "Oops! The game you requested doesn't exist..."},
                             status=status.HTTP_400_BAD_REQUEST,
                             content_type="application/json")
+
+
+class SearchView(APIView):
+    # GET Request - Gets the list of games given a game name
+    def get(self, request, game_name, page_number=None):
+
+        if game_name:
+            game_list = (webscrapper.search_game(game_name) if not page_number
+                         else webscrapper.search_game(game_name, page_number))
+
+            return Response({
+                "search_results": ListGameSerializer(game_list[2], many=True).data,
+                "is_there_next": game_list[1],
+                "is_there_previous": game_list[0]
+            })
+        else:
+            return Response({"error": "Oops! Sorry we didn't understand your request..."},
+                            status=status.HTTP_400_BAD_REQUEST,
+                            content_type="application/json")

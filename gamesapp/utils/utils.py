@@ -1,8 +1,8 @@
-def list_to_str(var):
+def list_to_str(using, list_):
     string = ""
-    for i, item in enumerate(var):
-        if i != len(var) - 1:
-            string += f'{item}/'
+    for i, item in enumerate(list_):
+        if i != len(list_) - 1:
+            string += f'{item}' + using
         else:
             string += f'{item}'
 

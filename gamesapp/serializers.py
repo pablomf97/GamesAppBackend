@@ -14,4 +14,4 @@ class GameSerializer(serializers.HyperlinkedModelSerializer):
 class ListGameSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = ListGame
-        fields = ['name', 'merchant', 'price', 'href']
+        fields = ['name', 'info', 'merchant', 'price', 'href']
