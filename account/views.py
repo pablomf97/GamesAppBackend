@@ -1,18 +1,16 @@
 from rest_framework.authentication import TokenAuthentication
-
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from django.contrib.auth.models import User as DjangoUser
-
-from .models import Account
 from .serializers import RegistrationSerializer
 
 
 class RegisterUserView(APIView):
-    permission_classes = [~IsAuthenticated]
+    authentication_classes = []
+    permission_classes = []
 
     def post(self, request):
         serializer = RegistrationSerializer(data=request.data)
@@ -23,6 +21,8 @@ class RegisterUserView(APIView):
             data['response'] = "Successfully registered new user."
             data['email'] = account.email
             data['username'] = account.username
+            token = Token.objects.get(user=account).key
+            data['token'] = token
         else:
             data = serializer.errors
 
