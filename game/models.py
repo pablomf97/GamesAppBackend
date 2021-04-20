@@ -1,7 +1,5 @@
 import uuid
-
 from django.db import models
-from django.contrib.auth.models import User as RESTUser
 
 
 class Game(models.Model):
@@ -18,6 +16,9 @@ class Game(models.Model):
     image_url = models.CharField(max_length=250, default='No image')
     page_url = models.CharField(max_length=250, default='No page url')
 
+    def __str__(self):
+        return self.name
+
 
 class ListGame(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -27,7 +28,5 @@ class ListGame(models.Model):
     price = models.CharField(max_length=250)
     href = models.CharField(max_length=250)
 
-
-class User(models.Model):
-    user = models.OneToOneField(RESTUser, on_delete=models.CASCADE)
-    games = models.ManyToManyField(Game)
+    def __str__(self):
+        return self.name

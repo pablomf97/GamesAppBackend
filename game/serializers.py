@@ -1,9 +1,9 @@
-# gamesapp/serializers
+# game/serializers
 from rest_framework import serializers
-from .models import Game, ListGame, User
+from .models import Game, ListGame
 
 
-class GameSerializer(serializers.HyperlinkedModelSerializer):
+class GameSerializer(serializers.ModelSerializer):
     class Meta:
         model = Game
         fields = ['name', 'description', 'release_date', 'official_website',
@@ -11,13 +11,7 @@ class GameSerializer(serializers.HyperlinkedModelSerializer):
                   'tags', 'image_url', 'page_url']
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
-        fields = ['user', 'games']
-
-
-class ListGameSerializer(serializers.HyperlinkedModelSerializer):
+class ListGameSerializer(serializers.ModelSerializer):
     class Meta:
         model = ListGame
         fields = ['name', 'info', 'merchant', 'price', 'href']

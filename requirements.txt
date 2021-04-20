@@ -13,10 +13,13 @@
 # \q
 
 # PIP REQUIREMENTS
-django
-beautifulsoup4
+django~=3.2
+djangorestframework~=3.12.4
+django-environ
+
+requests~=2.25.1
+beautifulsoup4~=4.9.3
 lxml
-requests
-djangorestframework
+
 psycopg2
 psycopg2-binary

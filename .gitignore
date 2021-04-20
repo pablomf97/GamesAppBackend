@@ -115,6 +115,7 @@ celerybeat.pid
 
 # Environments
 # .env
+*.env
 .env/
 .venv/
 env/
@@ -155,4 +156,4 @@ Thumbs.db
 .prof
 
 # migrations
-/gamesapp/migrations
+*/migrations

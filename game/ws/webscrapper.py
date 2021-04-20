@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 
-from gamesapp.models import ListGame, Game
+from game.models import ListGame, Game
 
 from ..utils.utils import *
 

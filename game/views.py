@@ -4,10 +4,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from ..ws import webscrapper
+from .ws import webscrapper
 
-from ..models import Game
-from ..serializers import GameSerializer, ListGameSerializer
+from .models import Game
+from .serializers import GameSerializer, ListGameSerializer
 
 
 # Create your views here.
