@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
+from game.models import Game
 from .serializers import RegistrationSerializer
 
 
@@ -27,6 +28,47 @@ class RegisterUserView(APIView):
             data = serializer.errors
 
         return Response(data)
+
+
+class AddGameToAccount(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, game_id):
+        user = request.user
+
+        try:
+            game = Game.objects.get(id=game_id)
+        except Game.DoesNotExist:
+            return Response(
+                {"message": "That game does not exist in our database."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        try:
+            if game not in user.games.all():
+                try:
+                    user.games.add(game)
+                    user.save()
+                    return Response(
+                        {"message": "Game successfully added to saved games."},
+                        status=status.HTTP_200_OK
+                    )
+
+                except:
+                    return Response(
+                        {"message": "Game could not be added to saved games."},
+                        status=status.HTTP_200_OK
+                    )
+            else:
+                return Response(
+                    {"message": "The game is already in your list!"}
+                )
+
+        except:
+            return Response(
+                {"message": "Oops! Something went wrong while trying to perform the operation"}
+            )
 
 
 class DeleteTokenView(APIView):
