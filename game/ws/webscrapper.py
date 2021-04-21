@@ -43,26 +43,65 @@ def get_game_from_url(game_url):
     # Get the game info
     game_info = soup.find_all('div', class_='game-info-table-value')
 
-    game_release_date = game_info[0].text.strip()
-    game_official_website = game_info[1].find('a')['href']
-    game_developer = game_info[2].text.strip()
-    game_publisher = game_info[3].text.strip()
-    game_pegi = game_info[5].text.strip()
-    game_description = soup.find('div', id='about') \
-        .find('p').text.strip()
+    try:
+        game_release_date = game_info[0].text.strip()
+    except:
+        game_release_date = 'No info about the release date'
+
+    try:
+        game_official_website = game_info[1].find('a')['href']
+    except:
+        game_official_website = 'No info about the official website'
+
+    try:
+        game_developer = game_info[2].text.strip()
+    except:
+        game_developer = 'No info about the developer'
+
+    try:
+        game_publisher = game_info[3].text.strip()
+    except:
+        game_publisher = 'No info about the publisher'
+
+    try:
+        game_pegi = game_info[5].text.strip()
+    except:
+        game_pegi = 'No info about the age restriction'
+
+    try:
+        game_description = soup.find('div', id='About') \
+            .find('p').text.strip()
+    except AttributeError:
+        try:
+            game_description = soup.find('div', id='about') \
+                .find('p').text.strip()
+        except:
+            game_description = 'No info about the game'
+    except:
+        game_description = 'No info about the game'
 
     # Need to perform some operations in some fields
-    game_platforms = game_info[4].text.split('\n')
-    game_platforms = split_platforms(game_platforms)
-    game_platforms = list_to_str('/', game_platforms)
+    try:
+        game_platforms = game_info[4].text.split('\n')
+        game_platforms = split_platforms(game_platforms)
+        game_platforms = list_to_str('/', game_platforms)
+    except:
+        game_platforms = 'No info about the platforms'
 
-    game_tags = game_info[6].text.split('\n')
-    game_tags = split_tags(game_tags)
-    game_tags = list_to_str('/', game_tags)
+    try:
+        game_tags = game_info[6].text.split('\n')
+        game_tags = split_tags(game_tags)
+        game_tags = list_to_str('/', game_tags)
+    except:
+        game_tags = 'No info about the tags'
 
-    game_image_html = soup.find('img', class_='gamepage__image--first gallery-element-image')
-    game_name = game_image_html.get('alt')
-    game_image = game_image_html.get('src')
+    try:
+        game_image_html = soup.find('img', class_='gamepage__image--first gallery-element-image')
+        game_name = game_image_html.get('alt')
+        game_image = game_image_html.get('src')
+    except:
+        game_name = 'No info about the name'
+        game_image = 'No info about the image'
 
     # And save it to an object
     game = Game(

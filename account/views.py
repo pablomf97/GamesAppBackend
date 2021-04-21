@@ -2,11 +2,14 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authtoken.models import Token
 from rest_framework.views import APIView
+from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import status
 
 from game.models import Game
+from game.serializers import GameSerializer
 from .serializers import RegistrationSerializer
+from .pagination import ResultSetPagination
 
 
 class RegisterUserView(APIView):
@@ -30,6 +33,7 @@ class RegisterUserView(APIView):
         return Response(data)
 
 
+# Messing with account games
 class AddGameToAccount(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
@@ -69,6 +73,18 @@ class AddGameToAccount(APIView):
             return Response(
                 {"message": "Oops! Something went wrong while trying to perform the operation"}
             )
+
+
+class GetAccountGames(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+    serializer_class = GameSerializer
+    pagination_class = ResultSetPagination
+
+    def get_queryset(self):
+        user = self.request.user
+
+        return user.games.all().order_by('id')
 
 
 class DeleteTokenView(APIView):
