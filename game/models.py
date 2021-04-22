@@ -15,6 +15,8 @@ class Game(models.Model):
     description = models.CharField(max_length=500, default='No description')
     image_url = models.CharField(max_length=250, default='No image')
     page_url = models.CharField(max_length=250, default='No page url')
+    user_rating = models.CharField(max_length=50, default='No user rating')
+    media_rating = models.CharField(max_length=50, default='No media rating')
 
     def __str__(self):
         return self.name
@@ -30,3 +32,14 @@ class ListGame(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Offer(models.Model):
+    shop = models.CharField(max_length=100)
+    region = models.CharField(max_length=100)
+    edition = models.CharField(max_length=100)
+    price_before_fees = models.CharField(max_length=100)
+    shop_url = models.CharField(max_length=250)
+
+    def __str__(self):
+        return self.edition + ' in ' + self.shop + ' for ' + self.price_before_fees

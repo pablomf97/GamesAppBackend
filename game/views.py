@@ -3,21 +3,21 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.generics import ListAPIView
+
+from GamesAPI.pagination import ResultSetPagination
 
 from .ws import webscrapper
 
 from .models import Game
-from .serializers import GameSerializer, ListGameSerializer
+from .serializers import GameSerializer, ListGameSerializer, OfferSerializer
 
 
 # Create your views here.
-class GameListView(APIView):
-
-    # GET request - Retrieves every game on the db
-    def get(self, request):
-        games = Game.objects.all()
-        serialized_games = GameSerializer(games, many=True)
-        return Response(serialized_games.data)
+class GameListView(ListAPIView):
+    pagination_class = ResultSetPagination
+    queryset = Game.objects.all().order_by('name')
+    serializer_class = GameSerializer
 
 
 class TopGamesView(APIView):
@@ -42,14 +42,22 @@ class GameView(APIView):
                                 status=status.HTTP_400_BAD_REQUEST,
                                 content_type="application/json")
 
-            # Check if the game exist in the database
             try:
-                game_db = Game.objects.get(page_url=game_url)
-                return Response(GameSerializer(game_db).data)
-            except ObjectDoesNotExist:
-                game = webscrapper.get_game_from_url(game_url)
-                game.save()
-                return Response(GameSerializer(game).data)
+                data = webscrapper.get_game_from_url(game_url)
+                game = data.get('game')
+                offers = data.get('offers')
+
+                if Game.objects.filter(page_url=game.page_url).count() == 0:
+                    game.save()
+
+                return Response({
+                    'game': GameSerializer(game).data,
+                    'offers': OfferSerializer(offers, many=True).data
+                })
+            except:
+                return Response({"error": "There was an error while trying to perform the operation..."},
+                                status=status.HTTP_404_NOT_FOUND,
+                                content_type="application/json")
 
         elif game_data.get('game_name'):
             try:

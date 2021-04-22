@@ -9,7 +9,7 @@ from rest_framework import status
 from game.models import Game
 from game.serializers import GameSerializer
 from .serializers import RegistrationSerializer
-from .pagination import ResultSetPagination
+from GamesAPI.pagination import ResultSetPagination
 
 
 class RegisterUserView(APIView):
@@ -82,9 +82,7 @@ class GetAccountGames(ListAPIView):
     pagination_class = ResultSetPagination
 
     def get_queryset(self):
-        user = self.request.user
-
-        return user.games.all().order_by('id')
+        return self.request.user.games.all().order_by('id')
 
 
 class DeleteTokenView(APIView):

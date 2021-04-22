@@ -1,7 +1,9 @@
 from bs4 import BeautifulSoup
 import requests
+from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 
-from game.models import ListGame, Game
+from game.models import ListGame, Game, Offer
 
 from ..utils.utils import *
 
@@ -36,9 +38,21 @@ def get_top_25():
 
 def get_game_from_url(game_url):
     # Get the game page
-    html_text = requests.get(game_url).text
+    options = webdriver.FirefoxOptions()
+    options.add_argument('--ignore-certificate-errors')
+    options.add_argument('--incognito')
+    options.add_argument('--headless')
+
+    driver = webdriver.Firefox(
+        executable_path="drivers/geckodriver",
+        firefox_options=options
+    )
+
+    driver.get(game_url)
+    WebDriverWait(driver, 5).until(lambda x: x.find_element_by_id('offer_offer'))
+
     # Create the soup
-    soup = BeautifulSoup(html_text, 'lxml')
+    soup = BeautifulSoup(driver.page_source, 'lxml')
 
     # Get the game info
     game_info = soup.find_all('div', class_='game-info-table-value')
@@ -92,6 +106,9 @@ def get_game_from_url(game_url):
         game_tags = game_info[6].text.split('\n')
         game_tags = split_tags(game_tags)
         game_tags = list_to_str('/', game_tags)
+
+        if '--' in game_tags:
+            game_tags = 'No tags assigned for this game'
     except:
         game_tags = 'No info about the tags'
 
@@ -102,6 +119,20 @@ def get_game_from_url(game_url):
     except:
         game_name = 'No info about the name'
         game_image = 'No info about the image'
+
+    try:
+        game_user_rating = soup.find('span', class_='hint').find('span').text.strip()
+    except:
+        game_user_rating = 'No info about the rating'
+
+    try:
+        game_media_rating = soup.find(
+            'div',
+            class_='metacritic-button metacritic-button-with-text metacritic-button-green'
+        ).text.strip()
+        game_media_rating = game_media_rating.split('\n')[-1].strip()
+    except:
+        game_media_rating = 'No info about the media rating'
 
     # And save it to an object
     game = Game(
@@ -115,10 +146,38 @@ def get_game_from_url(game_url):
         tags=game_tags,
         description=game_description,
         image_url=game_image,
-        page_url=game_url
+        page_url=game_url,
+        user_rating=game_user_rating,
+        media_rating=game_media_rating
     )
 
-    return game
+    offers = get_game_offers(soup)
+
+    return {
+        'game': game,
+        'offers': offers
+    }
+
+
+def get_game_offers(soup):
+    offers = []
+    game_offers = soup.find_all('div', id='offer_offer')
+
+    for item in game_offers:
+        try:
+            offers.append(
+                Offer(
+                    shop=item.find('span', class_='offers-merchant-name').text.strip(),
+                    region=item.find('div', id='offer_region_name').text.strip(),
+                    edition=item.find('a', class_='d-inline-block').text.strip(),
+                    price_before_fees=item.find('span', class_='x-offer-price').text.strip(),
+                    shop_url=item.find('a', class_='d-none d-lg-block buy-btn x-offer-buy-btn').get('href')
+                )
+            )
+        except:
+            pass
+
+    return offers
 
 
 def search_game(game_name, page=None):
