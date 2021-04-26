@@ -13,10 +13,18 @@ from GamesAPI.pagination import ResultSetPagination
 
 
 class RegisterUserView(APIView):
+    """
+    Manages requests to /user/register
+    """
+
     authentication_classes = []
     permission_classes = []
 
     def post(self, request):
+        """
+        POST request - Register a user
+        """
+
         serializer = RegistrationSerializer(data=request.data)
         data = {}
 
@@ -33,12 +41,18 @@ class RegisterUserView(APIView):
         return Response(data)
 
 
-# Messing with account games
 class AddGameToAccount(APIView):
+    """
+    Manages requests to user/add-game/<game_id>/
+    """
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
     def get(self, request, game_id):
+        """
+        GET request - Adds specified game to the account
+        """
+
         user = request.user
 
         try:
@@ -76,20 +90,34 @@ class AddGameToAccount(APIView):
 
 
 class GetAccountGames(ListAPIView):
+    """ 
+    Manages requests to user/get-games/
+    """
+    
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
     serializer_class = GameSerializer
     pagination_class = ResultSetPagination
 
     def get_queryset(self):
+        """ 
+        GET request - Returns the list of user's games
+        """
         return self.request.user.games.all().order_by('id')
 
 
 class DeleteTokenView(APIView):
+    """
+    Manages the requests to user/logout/
+    """
+
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
 
     def get(self, request):
+        """
+        GET request - Deletes the token assigned to the user
+        """
         request.user.auth_token.delete()
         return Response({"message": "Successfully logged out"},
                         status=status.HTTP_200_OK)

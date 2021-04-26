@@ -13,26 +13,40 @@ from .models import Game
 from .serializers import GameSerializer, ListGameSerializer, OfferSerializer
 
 
-# Create your views here.
 class GameListView(ListAPIView):
+    """ 
+    Manages requests to /games/all
+    """
+
     pagination_class = ResultSetPagination
     queryset = Game.objects.all().order_by('name')
     serializer_class = GameSerializer
 
 
 class TopGamesView(APIView):
+    """ 
+    Manages requests to /games/top-25
+    """
 
-    # GET request - Retrieves the top 25 games
     def get(self, request):
+        """
+        GET request - Retrieves the top 25 games
+        """
         top_25_games = webscrapper.get_top_25()
         serialized_games = ListGameSerializer(top_25_games, many=True)
         return Response(serialized_games.data)
 
 
 class GameView(APIView):
+    """
+    Manages the requests to /games/game
+    """
 
-    # GET request - Retrieves the requested game
     def get(self, request):
+        """
+        GET request - Retrieves the requested game
+        """
+
         game_data = request.data
 
         if game_data.get('game_href'):
@@ -54,7 +68,7 @@ class GameView(APIView):
                     'game': GameSerializer(game).data,
                     'offers': OfferSerializer(offers, many=True).data
                 })
-            except Exception as ecxp:
+            except:
                 return Response({"error": "There was an error while trying to perform the operation..."},
                                 status=status.HTTP_404_NOT_FOUND,
                                 content_type="application/json")
@@ -75,9 +89,14 @@ class GameView(APIView):
 
 
 class SearchView(APIView):
+    """
+    Returns the list of games that match the given name
+    """
 
-    # GET Request - Gets the list of games given a game name
     def get(self, request, game_name, page_number=None):
+        """
+        GET Request - Gets the list of games given a game name
+        """
 
         if game_name:
             game_list = (webscrapper.search_game(game_name) if not page_number

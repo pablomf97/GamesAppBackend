@@ -36,18 +36,23 @@ def get_top_25():
     return game_list
 
 
-def get_game_from_url(game_url):
-    # Get the game page using selenium
-    # because it has dynamic content
+def setup_selenium():
     options = webdriver.FirefoxOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
     options.add_argument('--headless')
 
-    driver = webdriver.Firefox(
-        executable_path="drivers/geckodriver",
+    return webdriver.Firefox(
+        # UNCOMMENT WHEN IN LINUX executable_path="drivers/geckodriver-linux",
+        executable_path="drivers/geckodriver-macos",
         firefox_options=options
     )
+
+
+def get_game_from_url(game_url):
+    # Get the game page using selenium
+    # because it has dynamic content
+    driver = setup_selenium()
     driver.get(game_url)
 
     # Wait until the offers appear in the webpage
@@ -171,19 +176,20 @@ def get_game_offers(soup):
     offers = []
     game_offers = soup.find_all('div', id='offer_offer')
 
-    for item in game_offers:
-        try:
-            offers.append(
-                Offer(
-                    shop=item.find('span', class_='offers-merchant-name').text.strip(),
-                    platform=item.find('div', id='offer_region_name').text.strip(),
-                    edition=item.find('a', class_='d-inline-block').text.strip(),
-                    price_before_fees=item.find('span', class_='x-offer-price').text.strip(),
-                    shop_url=item.find('a', class_='d-none d-lg-block buy-btn x-offer-buy-btn').get('href')
+    for i, item in enumerate(game_offers):
+        if i != 0:
+            try:
+                offers.append(
+                    Offer(
+                        shop=item.find('span', class_='offers-merchant-name').text.strip(),
+                        platform=item.find('div', id='offer_region_name').text.strip(),
+                        edition=item.find('a', class_='d-inline-block').text.strip(),
+                        price_before_fees=item.find('span', class_='x-offer-price').text.strip(),
+                        shop_url=item.find('a', class_='d-none d-lg-block buy-btn x-offer-buy-btn').get('href')
+                    )
                 )
-            )
-        except:
-            pass
+            except:
+                pass
 
     return offers
 

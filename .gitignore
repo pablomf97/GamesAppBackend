@@ -157,3 +157,5 @@ Thumbs.db
 
 # migrations
 */migrations
+
+*.vscode
