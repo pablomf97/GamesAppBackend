@@ -54,7 +54,7 @@ class GameView(APIView):
                     'game': GameSerializer(game).data,
                     'offers': OfferSerializer(offers, many=True).data
                 })
-            except:
+            except Exception as ecxp:
                 return Response({"error": "There was an error while trying to perform the operation..."},
                                 status=status.HTTP_404_NOT_FOUND,
                                 content_type="application/json")

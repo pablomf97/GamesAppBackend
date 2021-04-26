@@ -36,7 +36,7 @@ class ListGame(models.Model):
 
 class Offer(models.Model):
     shop = models.CharField(max_length=100)
-    region = models.CharField(max_length=100)
+    platform = models.CharField(max_length=100)
     edition = models.CharField(max_length=100)
     price_before_fees = models.CharField(max_length=100)
     shop_url = models.CharField(max_length=250)

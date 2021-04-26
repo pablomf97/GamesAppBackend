@@ -37,7 +37,8 @@ def get_top_25():
 
 
 def get_game_from_url(game_url):
-    # Get the game page
+    # Get the game page using selenium
+    # because it has dynamic content
     options = webdriver.FirefoxOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
@@ -47,13 +48,27 @@ def get_game_from_url(game_url):
         executable_path="drivers/geckodriver",
         firefox_options=options
     )
-
     driver.get(game_url)
+
+    # Wait until the offers appear in the webpage
     WebDriverWait(driver, 5).until(lambda x: x.find_element_by_id('offer_offer'))
 
     # Create the soup
     soup = BeautifulSoup(driver.page_source, 'lxml')
 
+    # Get the game
+    game = get_game_details(soup, game_url)
+
+    # Get the offers
+    offers = get_game_offers(soup)
+
+    return {
+        'game': game,
+        'offers': offers
+    }
+
+
+def get_game_details(soup, game_url):
     # Get the game info
     game_info = soup.find_all('div', class_='game-info-table-value')
 
@@ -135,7 +150,7 @@ def get_game_from_url(game_url):
         game_media_rating = 'No info about the media rating'
 
     # And save it to an object
-    game = Game(
+    return Game(
         name=game_name,
         release_date=game_release_date,
         official_website=game_official_website,
@@ -151,13 +166,6 @@ def get_game_from_url(game_url):
         media_rating=game_media_rating
     )
 
-    offers = get_game_offers(soup)
-
-    return {
-        'game': game,
-        'offers': offers
-    }
-
 
 def get_game_offers(soup):
     offers = []
@@ -168,7 +176,7 @@ def get_game_offers(soup):
             offers.append(
                 Offer(
                     shop=item.find('span', class_='offers-merchant-name').text.strip(),
-                    region=item.find('div', id='offer_region_name').text.strip(),
+                    platform=item.find('div', id='offer_region_name').text.strip(),
                     edition=item.find('a', class_='d-inline-block').text.strip(),
                     price_before_fees=item.find('span', class_='x-offer-price').text.strip(),
                     shop_url=item.find('a', class_='d-none d-lg-block buy-btn x-offer-buy-btn').get('href')

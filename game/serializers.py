@@ -15,7 +15,7 @@ class GameSerializer(serializers.ModelSerializer):
 class OfferSerializer(serializers.ModelSerializer):
     class Meta:
         model = Offer
-        fields = ['shop', 'region', 'platform', 'edition',
+        fields = ['shop', 'platform', 'edition',
                   'price_before_fees', 'shop_url']
 
 
