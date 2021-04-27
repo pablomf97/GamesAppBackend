@@ -1,3 +1,8 @@
+"""
+This file contains the webscrapper
+that will get the info related to games.
+"""
+
 from bs4 import BeautifulSoup
 import requests
 from selenium import webdriver
@@ -25,9 +30,12 @@ def get_top_25():
         # Create list game item
         game = ListGame(
             id=i,
-            name=html_game_list[i].find('div', class_='topclick-list-element-game-title').text.strip(),
-            merchant=html_game_list[i].find('div', class_='topclick-list-element-game-merchant').text.strip(),
-            price=html_game_list[i].find('span', class_='topclick-list-element-price').text.strip(),
+            name=html_game_list[i].find(
+                'div', class_='topclick-list-element-game-title').text.strip(),
+            merchant=html_game_list[i].find(
+                'div', class_='topclick-list-element-game-merchant').text.strip(),
+            price=html_game_list[i].find(
+                'span', class_='topclick-list-element-price').text.strip(),
             href=html_game_list[i]['href']
         )
         # Add it to the list
@@ -37,6 +45,10 @@ def get_top_25():
 
 
 def setup_selenium():
+    """
+    Creates a browser that will allow us 
+    to get dynamic content from the website.
+    """
     options = webdriver.FirefoxOptions()
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--incognito')
@@ -50,30 +62,36 @@ def setup_selenium():
 
 
 def get_game_from_url(game_url):
+    # Get the page html
+    html_text = requests.get(game_url).text
+    # Create the soup
+    soup = BeautifulSoup(html_text, 'lxml')
+
+    # Start scrapping info
+    return __get_game_details(
+        soup=soup,
+        game_url=game_url
+    )
+
+
+def get_game_offers(game_url):
     # Get the game page using selenium
     # because it has dynamic content
     driver = setup_selenium()
     driver.get(game_url)
 
     # Wait until the offers appear in the webpage
-    WebDriverWait(driver, 5).until(lambda x: x.find_element_by_id('offer_offer'))
+    WebDriverWait(driver, 10).until(
+        lambda x: x.find_element_by_id('offer_offer'))
 
     # Create the soup
     soup = BeautifulSoup(driver.page_source, 'lxml')
 
-    # Get the game
-    game = get_game_details(soup, game_url)
-
-    # Get the offers
-    offers = get_game_offers(soup)
-
-    return {
-        'game': game,
-        'offers': offers
-    }
+    # Start scrapping info
+    return __get_game_offers(soup)
 
 
-def get_game_details(soup, game_url):
+def __get_game_details(soup, game_url):
     # Get the game info
     game_info = soup.find_all('div', class_='game-info-table-value')
 
@@ -133,7 +151,8 @@ def get_game_details(soup, game_url):
         game_tags = 'No info about the tags'
 
     try:
-        game_image_html = soup.find('img', class_='gamepage__image--first gallery-element-image')
+        game_image_html = soup.find(
+            'img', class_='gamepage__image--first gallery-element-image')
         game_name = game_image_html.get('alt')
         game_image = game_image_html.get('src')
     except:
@@ -141,7 +160,8 @@ def get_game_details(soup, game_url):
         game_image = 'No info about the image'
 
     try:
-        game_user_rating = soup.find('span', class_='hint').find('span').text.strip()
+        game_user_rating = soup.find(
+            'span', class_='hint').find('span').text.strip()
     except:
         game_user_rating = 'No info about the rating'
 
@@ -172,7 +192,7 @@ def get_game_details(soup, game_url):
     )
 
 
-def get_game_offers(soup):
+def __get_game_offers(soup):
     offers = []
     game_offers = soup.find_all('div', id='offer_offer')
 
@@ -181,11 +201,16 @@ def get_game_offers(soup):
             try:
                 offers.append(
                     Offer(
-                        shop=item.find('span', class_='offers-merchant-name').text.strip(),
-                        platform=item.find('div', id='offer_region_name').text.strip(),
-                        edition=item.find('a', class_='d-inline-block').text.strip(),
-                        price_before_fees=item.find('span', class_='x-offer-price').text.strip(),
-                        shop_url=item.find('a', class_='d-none d-lg-block buy-btn x-offer-buy-btn').get('href')
+                        shop=item.find(
+                            'span', class_='offers-merchant-name').text.strip(),
+                        platform=item.find(
+                            'div', id='offer_region_name').text.strip(),
+                        edition=item.find(
+                            'a', class_='d-inline-block').text.strip(),
+                        price_before_fees=item.find(
+                            'span', class_='x-offer-price').text.strip(),
+                        shop_url=item.find(
+                            'a', class_='d-none d-lg-block buy-btn x-offer-buy-btn').get('href')
                     )
                 )
             except:
@@ -198,7 +223,8 @@ def search_game(game_name, page=None):
     game_name_formatted = list_to_str('+', game_name.split('-'))
 
     if page:
-        html_text = requests.get(REQUEST_URL_SEARCH + game_name_formatted + f'/page-{page}').text
+        html_text = requests.get(
+            REQUEST_URL_SEARCH + game_name_formatted + f'/page-{page}').text
     else:
         html_text = requests.get(REQUEST_URL_SEARCH + game_name_formatted).text
 
@@ -217,10 +243,13 @@ def search_game(game_name, page=None):
                 # Create list game item
                 game = ListGame(
                     id=i,
-                    name=html_game_list[i].find('h2', class_='search-results-row-game-title').text.strip(),
-                    info=html_game_list[i].find('div', class_='search-results-row-game-infos').text.strip(),
+                    name=html_game_list[i].find(
+                        'h2', class_='search-results-row-game-title').text.strip(),
+                    info=html_game_list[i].find(
+                        'div', class_='search-results-row-game-infos').text.strip(),
                     merchant=None,
-                    price=html_game_list[i].find('div', class_='search-results-row-price').text.strip(),
+                    price=html_game_list[i].find(
+                        'div', class_='search-results-row-price').text.strip(),
                     href=html_game_list[i]['href']
                 )
                 # Add it to the list
@@ -229,7 +258,8 @@ def search_game(game_name, page=None):
         pagination = soup.find_all('li', class_='pagination-page')
 
         if len(pagination) > 0:
-            active_page = soup.find('li', class_='pagination-page active').text.strip()
+            active_page = soup.find(
+                'li', class_='pagination-page active').text.strip()
 
             if int(active_page) > 1:
                 is_there_previous = True

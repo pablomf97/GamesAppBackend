@@ -52,22 +52,21 @@ class GameView(APIView):
         if game_data.get('game_href'):
             game_url = game_data.get('game_href')
             if not game_url.startswith(webscrapper.REQUEST_URL_BASE):
-                return Response({"error": "Oops! The game you requested doesn't exist..."},
+                return Response({"error": "Oops! There was something wrong with the request..."},
                                 status=status.HTTP_400_BAD_REQUEST,
                                 content_type="application/json")
 
+            if Game.objects.filter(page_url=game_url).count() > 0:
+                db_game = Game.objects.get(page_url=game_url)
+                return Response(GameSerializer(db_game).data)
+
             try:
-                data = webscrapper.get_game_from_url(game_url)
-                game = data.get('game')
-                offers = data.get('offers')
+                game = webscrapper.get_game_from_url(game_url)
 
                 if Game.objects.filter(page_url=game.page_url).count() == 0:
                     game.save()
 
-                return Response({
-                    'game': GameSerializer(game).data,
-                    'offers': OfferSerializer(offers, many=True).data
-                })
+                return Response(GameSerializer(game).data)
             except:
                 return Response({"error": "There was an error while trying to perform the operation..."},
                                 status=status.HTTP_404_NOT_FOUND,
@@ -86,6 +85,54 @@ class GameView(APIView):
             return Response({"error": "Oops! The game you requested doesn't exist..."},
                             status=status.HTTP_400_BAD_REQUEST,
                             content_type="application/json")
+
+
+class GameOffersView(APIView):
+    """
+    Returns the list of offers for a game
+    """
+
+    def get(self, request):
+        """
+        GET request - Gets the list of offers given
+        either a game name or a game url
+        """
+        game_url = ""
+
+        if request.data.get('game_url'):
+            game_url = request.data.get('game_url')
+        elif request.data.get('game_name'):
+            try:
+                game_name = request.data.get('game_name')
+                game = Game.objects.get(name=game_name)
+                game_url = game.page_url
+            except:
+                return Response(
+                    {
+                        "message": "Oops! Could not find the "
+                        + "game you were looking for..."
+                    },
+                    status=status.HTTP_404_NOT_FOUND)
+
+        if game_url:
+            try:
+                offers = webscrapper.get_game_offers(game_url)
+
+                return Response(OfferSerializer(offers, many=True).data)
+            except:
+                return Response(
+                    {
+                        "message": "Oops! Something went wrong while "
+                        + "trying to perform the operation"
+                    }
+                )
+
+        return Response(
+            {
+                "message": "Oops! We could not understand your request..."
+            },
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 
 class SearchView(APIView):
