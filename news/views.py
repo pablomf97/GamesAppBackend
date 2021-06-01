@@ -6,6 +6,8 @@ to gaming news, which is, in this case:
     or just the latest news in general.
 """
 
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -18,6 +20,9 @@ class NewsView(APIView):
     """
     Manages requests to news/
     """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request, type_=None):
         """

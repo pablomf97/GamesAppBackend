@@ -159,3 +159,9 @@ Thumbs.db
 */migrations
 
 *.vscode
+
+### AppEngine ###
+# Google App Engine generated folder
+appengine-generated/
+staticfiles/
+cloud_sql_proxy

@@ -1,4 +1,6 @@
 from django.core.exceptions import ObjectDoesNotExist
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -18,6 +20,9 @@ class GameListView(ListAPIView):
     Manages requests to /games/all
     """
 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
     pagination_class = ResultSetPagination
     queryset = Game.objects.all().order_by('name')
     serializer_class = GameSerializer
@@ -27,6 +32,9 @@ class TopGamesView(APIView):
     """ 
     Manages requests to /games/top-25
     """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request):
         """
@@ -41,6 +49,8 @@ class GameView(APIView):
     """
     Manages the requests to /games/game
     """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request):
         """
@@ -92,6 +102,9 @@ class GameOffersView(APIView):
     Returns the list of offers for a game
     """
 
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
     def get(self, request):
         """
         GET request - Gets the list of offers given
@@ -139,6 +152,9 @@ class SearchView(APIView):
     """
     Returns the list of games that match the given name
     """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
 
     def get(self, request, game_name, page_number=None):
         """

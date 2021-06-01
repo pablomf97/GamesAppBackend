@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 import environ
 
@@ -31,7 +32,7 @@ SECRET_KEY = env('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['vgsmasher-backend.ew.r.appspot.com', '127.0.0.1']
 
 
 # Application definition
@@ -85,16 +86,28 @@ WSGI_APPLICATION = 'GamesAPI.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': env('DATABASE_NAME'),
-        'USER': env('DATABASE_USER'),
-        'PASSWORD': env('DATABASE_PASS'),
-        'HOST': 'localhost',
-        'PORT': '',
+if os.getenv('GAE_APPLICATION', None):
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': env('CLOUD_DATABASE_NAME'),
+            'USER': env('CLOUD_DATABASE_USER'),
+            'PASSWORD': env('CLOUD_DATABASE_PASS'),
+            'HOST': env('CLOUD_DATABASE_HOST'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': env('CLOUD_DATABASE_NAME'),
+            'USER': env('CLOUD_DATABASE_USER'),
+            'PASSWORD': env('CLOUD_DATABASE_PASS'),
+            'HOST': '127.0.0.1',
+            'PORT': '3306',
+        }
+    }
+
 
 
 # Password validation
@@ -133,6 +146,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATIC_URL = '/static/'
 
 # Default primary key field type

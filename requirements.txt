@@ -13,6 +13,8 @@
 # GRANT ALL PRIVILEGES ON DATABASE gamesdb TO gamesdbuser;
 # \q
 
+# Connection name -> vgsmasher-backend:europe-west1:gamesdb
+
 # PIP REQUIREMENTS
 wheel
 
@@ -26,3 +28,5 @@ selenium
 lxml
 
 psycopg2-binary
+
+gunicorn
