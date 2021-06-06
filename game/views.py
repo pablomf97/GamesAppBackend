@@ -105,8 +105,9 @@ class GameOffersView(APIView):
 
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
+    http_method_names = ['post']
 
-    def get(self, request):
+    def post(self, request):
         """
         GET request - Gets the list of offers given
         either a game name or a game url
