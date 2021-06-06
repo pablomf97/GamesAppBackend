@@ -51,10 +51,11 @@ class GameView(APIView):
     """
     permission_classes = [IsAuthenticated]
     authentication_classes = [TokenAuthentication]
-
-    def get(self, request):
+    http_method_names = ['post']
+    
+    def post(self, request):
         """
-        GET request - Retrieves the requested game
+        POST request - Retrieves the requested game
         """
 
         game_data = request.data
