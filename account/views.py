@@ -41,6 +41,34 @@ class RegisterUserView(APIView):
         return Response(data)
 
 
+class IsGameFavourited(APIView):
+    """
+    Manages requests to user/is-favourites/<game_id>
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, game_id):
+        """
+        GET request - Checks if specified game is in favourites
+        """
+
+        user = request.user
+        isFavourited = False
+
+        try:
+            games = user.games.all()
+            if len(games) > 0:
+                for game in games:
+                    if str(game.id).lower() == game_id.lower():
+                        isFavourited = True
+                        break
+        except:
+            return Response({"message": "Could not check if game was favourited."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return Response({"is_favourited": isFavourited})
+
+
 class AddGameToAccount(APIView):
     """
     Manages requests to user/add-game/<game_id>/
@@ -87,6 +115,33 @@ class AddGameToAccount(APIView):
             return Response(
                 {"message": "Oops! Something went wrong while trying to perform the operation"}
             )
+
+
+class RemoveGameFromAccount(APIView):
+    """
+    Manages requests to user/remove-game/
+    """
+
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request, game_id):
+        """
+        GET request - Removes game from account
+        """
+
+        user = request.user
+        success = False
+
+        try:
+            game = user.games.filter(id=game_id)
+            if game:
+                user.games.remove(game[0])
+                success = True
+        except Exception as e:
+            return Response({"message": "There was an error while trying to remove the game."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response({"success": success})
 
 
 class GetAccountGames(ListAPIView):
